@@ -1,0 +1,40 @@
+{
+  "name": "claude-usage-vscode",
+  "displayName": "Claude Code Usage",
+  "description": "Shows Claude Code API usage in the VS Code status bar with auto-refresh and shared caching",
+  "version": "0.1.0",
+  "publisher": "sevenuphome",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sevenuphome/claude-usage-vscode"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeUsage.show",
+        "title": "Claude Usage: Show Details"
+      },
+      {
+        "command": "claudeUsage.refresh",
+        "title": "Claude Usage: Refresh"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Code Usage",
+      "properties": {
+        "claudeUsage.refreshIntervalMinutes": {
+          "type": "number",
+          "default": 5,
+          "description": "How often to refresh usage data (in minutes)"
+        }
+      }
+    }
+  }
+}
