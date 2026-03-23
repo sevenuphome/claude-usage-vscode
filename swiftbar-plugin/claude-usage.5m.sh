@@ -163,16 +163,15 @@ if os.path.exists(result_file):
     os.remove(result_file)
 
 if result == "up-to-date":
-    print(f"✓ Up to date (v{ver}) | size=13")
+    print(f"✓ Up to date (v{ver}) | size=12 color=gray")
 elif result.startswith("available:"):
     parts = result.split(":")
-    print(f"New version v{parts[2]} available | size=13")
-    print(f"Update now | bash=$0 param1=--update terminal=false refresh=true size=13")
+    print(f"Update to v{parts[2]} | bash=$0 param1=--update terminal=false refresh=true size=13")
 elif result.startswith("updated:"):
     parts = result.split(":")
-    print(f"✓ Updated to v{parts[2]} | size=13")
+    print(f"✓ Updated to v{parts[2]} | size=12 color=gray")
 else:
-    print(f"v{ver} · Check for Updates… | bash=$0 param1=--check terminal=false refresh=true size=13")
+    print(f"Check for Updates (v{ver}) | bash=$0 param1=--check terminal=false refresh=true size=13")
 print("---")
 print("Quit Claude Usage | bash=/bin/bash param1=-c param2='osascript -e \"tell application \\\"SwiftBar\\\" to quit\"' terminal=false size=13")
 PYEOF
