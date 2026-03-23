@@ -143,6 +143,10 @@ for name, bucket in buckets:
     print("---")
 
 # ── Footer ──
-print(f"↻ Refresh | refresh=true sfSymbol=arrow.clockwise size=12 color=#8E8E93 font={FONT}")
-print(f"↓ Update plugin | bash=/bin/bash param1=-c param2='curl -sL https://raw.githubusercontent.com/sevenuphome/claude-usage-vscode/main/swiftbar-plugin/claude-usage.5m.sh -o \"$HOME/Library/Application Support/SwiftBar/Plugins/claude-usage.5m.sh\" && chmod +x \"$HOME/Library/Application Support/SwiftBar/Plugins/claude-usage.5m.sh\"' terminal=false refresh=true sfSymbol=arrow.down.circle size=12 color=#8E8E93 font={FONT}")
+print("↻ Refresh | refresh=true size=12 color=#8E8E93")
+
+update_url = "https://raw.githubusercontent.com/sevenuphome/claude-usage-vscode/main/swiftbar-plugin/claude-usage.5m.sh"
+plugin_path = "$HOME/Library/Application Support/SwiftBar/Plugins/claude-usage.5m.sh"
+update_cmd = f'curl -sL {update_url} -o "{plugin_path}" && chmod +x "{plugin_path}"'
+print(f"↓ Update plugin | bash=/bin/bash param1=-c param2={update_cmd!r} terminal=false refresh=true size=12 color=#8E8E93")
 PYEOF
