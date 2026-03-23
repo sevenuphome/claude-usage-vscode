@@ -20,6 +20,7 @@ if [ "$1" = "--check" ]; then
   else
     echo "available:$VERSION:$REMOTE_VER" > /tmp/.claude-usage-update-result
   fi
+  date +%s > /tmp/.claude-usage-last-check
   exit 0
 fi
 
@@ -154,23 +155,34 @@ for name, bucket in buckets:
 print("---")
 print("Refresh | refresh=true size=13")
 
-import os
+import os, time
 ver = os.environ.get('CLAUDE_USAGE_VERSION', '?')
 plugin = os.path.expanduser("~/.claude/bin/claude-usage-update.sh")
 result_file = "/tmp/.claude-usage-update-result"
+check_file = "/tmp/.claude-usage-last-check"
+
+# Read last check result (one-time, consumed on read)
 result = ""
 if os.path.exists(result_file):
     result = open(result_file).read().strip()
     os.remove(result_file)
 
-if result == "up-to-date":
-    print(f"✓ Up to date (v{ver}) | size=12 color=gray")
-elif result.startswith("available:"):
+# Check if last check was within 24 hours
+checked_recently = False
+if os.path.exists(check_file):
+    try:
+        last_check = int(open(check_file).read().strip())
+        checked_recently = (time.time() - last_check) < 86400
+    except: pass
+
+if result.startswith("available:"):
     parts = result.split(":")
     print(f"Update to v{parts[2]} | bash={plugin} param1=--update terminal=false refresh=true size=13")
 elif result.startswith("updated:"):
     parts = result.split(":")
     print(f"✓ Updated to v{parts[2]} | size=12 color=gray")
+elif checked_recently:
+    print(f"✓ Up to date (v{ver}) | size=12 color=gray")
 else:
     print(f"Check for Updates (v{ver}) | bash={plugin} param1=--check terminal=false refresh=true size=13")
 print("---")
