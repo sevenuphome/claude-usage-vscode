@@ -86,7 +86,7 @@ if [ -z "$DATA" ]; then
   exit 0
 fi
 
-CLAUDE_USAGE_DATA="$DATA" CLAUDE_USAGE_VERSION="$VERSION" CLAUDE_PLUGIN_PATH="$PLUGIN_PATH" python3 << 'PYEOF'
+CLAUDE_USAGE_DATA="$DATA" CLAUDE_USAGE_VERSION="$VERSION" python3 << 'PYEOF'
 import json, os
 from datetime import datetime, timezone
 
@@ -156,7 +156,7 @@ print("Refresh | refresh=true size=13")
 
 import os
 ver = os.environ.get('CLAUDE_USAGE_VERSION', '?')
-plugin = os.environ.get('CLAUDE_PLUGIN_PATH', '')
+plugin = os.path.expanduser("~/.claude/bin/claude-usage-update.sh")
 result_file = "/tmp/.claude-usage-update-result"
 result = ""
 if os.path.exists(result_file):
