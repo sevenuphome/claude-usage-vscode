@@ -1,12 +1,30 @@
 #!/bin/bash
 # <bitbar.title>Claude Code Usage</bitbar.title>
-# <bitbar.version>v0.3</bitbar.version>
+# <bitbar.version>v0.4</bitbar.version>
 # <bitbar.author>sevenuphome</bitbar.author>
 # <bitbar.desc>Shows Claude Code API usage in the menu bar</bitbar.desc>
 # <swiftbar.hideAbout>true</swiftbar.hideAbout>
 # <swiftbar.hideRunInTerminal>true</swiftbar.hideRunInTerminal>
 # <swiftbar.hideDisablePlugin>true</swiftbar.hideDisablePlugin>
 # <swiftbar.hideSwiftBar>true</swiftbar.hideSwiftBar>
+
+VERSION="0.4"
+PLUGIN_URL="https://raw.githubusercontent.com/sevenuphome/claude-usage-vscode/main/swiftbar-plugin/claude-usage.5m.sh"
+PLUGIN_PATH="$HOME/Library/Application Support/SwiftBar/Plugins/claude-usage.5m.sh"
+
+# Handle --update flag
+if [ "$1" = "--update" ]; then
+  REMOTE=$(curl -sL "$PLUGIN_URL")
+  REMOTE_VER=$(echo "$REMOTE" | grep '^VERSION=' | head -1 | cut -d'"' -f2)
+  if [ "$VERSION" = "$REMOTE_VER" ]; then
+    osascript -e "display notification \"You are on the latest version (v$VERSION)\" with title \"Claude Usage\" sound name \"Glass\""
+  else
+    echo "$REMOTE" > "$PLUGIN_PATH"
+    chmod +x "$PLUGIN_PATH"
+    osascript -e "display notification \"Updated from v$VERSION to v$REMOTE_VER\" with title \"Claude Usage\" sound name \"Purr\""
+  fi
+  exit 0
+fi
 
 CACHE_FILE="$HOME/.claude/.usage-cache.json"
 CACHE_TTL=60  # seconds
@@ -129,10 +147,7 @@ for name, bucket in buckets:
 print("---")
 print("Refresh | refresh=true size=13")
 
-update_url = "https://raw.githubusercontent.com/sevenuphome/claude-usage-vscode/main/swiftbar-plugin/claude-usage.5m.sh"
-plugin_path = "$HOME/Library/Application Support/SwiftBar/Plugins/claude-usage.5m.sh"
-update_cmd = f'curl -sL {update_url} -o "{plugin_path}" && chmod +x "{plugin_path}"'
-print(f"Update Plugin… | bash=/bin/bash param1=-c param2={update_cmd!r} terminal=false refresh=true size=13")
+print("Check for Updates… | bash=$0 param1=--update terminal=false refresh=true size=13")
 print("---")
 print("Quit Claude Usage | bash=/bin/bash param1=-c param2='osascript -e \"tell application \\\"SwiftBar\\\" to quit\"' terminal=false size=13")
 PYEOF
