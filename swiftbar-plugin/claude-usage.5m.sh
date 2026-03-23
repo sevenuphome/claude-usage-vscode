@@ -17,11 +17,11 @@ if [ "$1" = "--update" ]; then
   REMOTE=$(curl -sL "$PLUGIN_URL")
   REMOTE_VER=$(echo "$REMOTE" | grep '^VERSION=' | head -1 | cut -d'"' -f2)
   if [ "$VERSION" = "$REMOTE_VER" ]; then
-    osascript -e "display dialog \"You are on the latest version (v$VERSION)\" with title \"Claude Usage\" buttons {\"OK\"} default button \"OK\" with icon note"
+    echo "up-to-date" > /tmp/.claude-usage-update-result
   else
     echo "$REMOTE" > "$PLUGIN_PATH"
     chmod +x "$PLUGIN_PATH"
-    osascript -e "display dialog \"Updated from v$VERSION to v$REMOTE_VER\" with title \"Claude Usage\" buttons {\"OK\"} default button \"OK\" with icon note"
+    echo "updated:$VERSION:$REMOTE_VER" > /tmp/.claude-usage-update-result
   fi
   exit 0
 fi
@@ -79,7 +79,7 @@ if [ -z "$DATA" ]; then
   exit 0
 fi
 
-CLAUDE_USAGE_DATA="$DATA" python3 << 'PYEOF'
+CLAUDE_USAGE_DATA="$DATA" CLAUDE_USAGE_VERSION="$VERSION" python3 << 'PYEOF'
 import json, os
 from datetime import datetime, timezone
 
@@ -146,6 +146,18 @@ for name, bucket in buckets:
 
 print("---")
 print("Refresh | refresh=true size=13")
+
+# Show update result if available
+import os
+result_file = "/tmp/.claude-usage-update-result"
+if os.path.exists(result_file):
+    result = open(result_file).read().strip()
+    os.remove(result_file)
+    if result == "up-to-date":
+        print(f"✓ Up to date (v{os.environ.get('CLAUDE_USAGE_VERSION', '?')}) | size=12 color=gray")
+    elif result.startswith("updated:"):
+        parts = result.split(":")
+        print(f"✓ Updated from v{parts[1]} to v{parts[2]} | size=12 color=gray")
 
 print("Check for Updates… | bash=$0 param1=--update terminal=false refresh=true size=13")
 print("---")
