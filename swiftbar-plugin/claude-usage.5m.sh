@@ -17,11 +17,11 @@ if [ "$1" = "--update" ]; then
   REMOTE=$(curl -sL "$PLUGIN_URL")
   REMOTE_VER=$(echo "$REMOTE" | grep '^VERSION=' | head -1 | cut -d'"' -f2)
   if [ "$VERSION" = "$REMOTE_VER" ]; then
-    osascript -e "display notification \"You are on the latest version (v$VERSION)\" with title \"Claude Usage\" sound name \"Glass\""
+    osascript -e "display dialog \"You are on the latest version (v$VERSION)\" with title \"Claude Usage\" buttons {\"OK\"} default button \"OK\" with icon note"
   else
     echo "$REMOTE" > "$PLUGIN_PATH"
     chmod +x "$PLUGIN_PATH"
-    osascript -e "display notification \"Updated from v$VERSION to v$REMOTE_VER\" with title \"Claude Usage\" sound name \"Purr\""
+    osascript -e "display dialog \"Updated from v$VERSION to v$REMOTE_VER\" with title \"Claude Usage\" buttons {\"OK\"} default button \"OK\" with icon note"
   fi
   exit 0
 fi
