@@ -12,17 +12,24 @@ VERSION="0.4"
 PLUGIN_URL="https://raw.githubusercontent.com/sevenuphome/claude-usage-vscode/main/swiftbar-plugin/claude-usage.5m.sh"
 PLUGIN_PATH="$HOME/Library/Application Support/SwiftBar/Plugins/claude-usage.5m.sh"
 
-# Handle --update flag
-if [ "$1" = "--update" ]; then
-  REMOTE=$(curl -sL "$PLUGIN_URL")
-  REMOTE_VER=$(echo "$REMOTE" | grep '^VERSION=' | head -1 | cut -d'"' -f2)
+# Handle --check flag (check only, don't install)
+if [ "$1" = "--check" ]; then
+  REMOTE_VER=$(curl -sL "$PLUGIN_URL" | grep '^VERSION=' | head -1 | cut -d'"' -f2)
   if [ "$VERSION" = "$REMOTE_VER" ]; then
     echo "up-to-date" > /tmp/.claude-usage-update-result
   else
-    echo "$REMOTE" > "$PLUGIN_PATH"
-    chmod +x "$PLUGIN_PATH"
-    echo "updated:$VERSION:$REMOTE_VER" > /tmp/.claude-usage-update-result
+    echo "available:$VERSION:$REMOTE_VER" > /tmp/.claude-usage-update-result
   fi
+  exit 0
+fi
+
+# Handle --update flag (actually install)
+if [ "$1" = "--update" ]; then
+  REMOTE=$(curl -sL "$PLUGIN_URL")
+  REMOTE_VER=$(echo "$REMOTE" | grep '^VERSION=' | head -1 | cut -d'"' -f2)
+  echo "$REMOTE" > "$PLUGIN_PATH"
+  chmod +x "$PLUGIN_PATH"
+  echo "updated:$VERSION:$REMOTE_VER" > /tmp/.claude-usage-update-result
   exit 0
 fi
 
@@ -150,17 +157,22 @@ print("Refresh | refresh=true size=13")
 import os
 ver = os.environ.get('CLAUDE_USAGE_VERSION', '?')
 result_file = "/tmp/.claude-usage-update-result"
+result = ""
 if os.path.exists(result_file):
     result = open(result_file).read().strip()
     os.remove(result_file)
-    if result == "up-to-date":
-        print(f"✓ Up to date (v{ver}) | size=12 color=gray")
-    elif result.startswith("updated:"):
-        parts = result.split(":")
-        print(f"✓ Updated from v{parts[1]} to v{parts[2]} | size=12 color=gray")
-    print("Check for Updates… | bash=$0 param1=--update terminal=false refresh=true size=13")
+
+if result == "up-to-date":
+    print(f"✓ Up to date (v{ver}) | size=13")
+elif result.startswith("available:"):
+    parts = result.split(":")
+    print(f"New version v{parts[2]} available | size=13")
+    print(f"Update now | bash=$0 param1=--update terminal=false refresh=true size=13")
+elif result.startswith("updated:"):
+    parts = result.split(":")
+    print(f"✓ Updated to v{parts[2]} | size=13")
 else:
-    print(f"v{ver} · Check for Updates… | bash=$0 param1=--update terminal=false refresh=true size=13")
+    print(f"v{ver} · Check for Updates… | bash=$0 param1=--check terminal=false refresh=true size=13")
 print("---")
 print("Quit Claude Usage | bash=/bin/bash param1=-c param2='osascript -e \"tell application \\\"SwiftBar\\\" to quit\"' terminal=false size=13")
 PYEOF
