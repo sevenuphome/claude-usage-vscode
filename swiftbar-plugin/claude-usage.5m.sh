@@ -147,19 +147,20 @@ for name, bucket in buckets:
 print("---")
 print("Refresh | refresh=true size=13")
 
-# Show update result if available
 import os
+ver = os.environ.get('CLAUDE_USAGE_VERSION', '?')
 result_file = "/tmp/.claude-usage-update-result"
 if os.path.exists(result_file):
     result = open(result_file).read().strip()
     os.remove(result_file)
     if result == "up-to-date":
-        print(f"✓ Up to date (v{os.environ.get('CLAUDE_USAGE_VERSION', '?')}) | size=12 color=gray")
+        print(f"✓ Up to date (v{ver}) | size=12 color=gray")
     elif result.startswith("updated:"):
         parts = result.split(":")
         print(f"✓ Updated from v{parts[1]} to v{parts[2]} | size=12 color=gray")
-
-print("Check for Updates… | bash=$0 param1=--update terminal=false refresh=true size=13")
+    print("Check for Updates… | bash=$0 param1=--update terminal=false refresh=true size=13")
+else:
+    print(f"v{ver} · Check for Updates… | bash=$0 param1=--update terminal=false refresh=true size=13")
 print("---")
 print("Quit Claude Usage | bash=/bin/bash param1=-c param2='osascript -e \"tell application \\\"SwiftBar\\\" to quit\"' terminal=false size=13")
 PYEOF
