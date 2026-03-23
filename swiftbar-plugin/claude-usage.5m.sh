@@ -73,22 +73,8 @@ five_u = five.get('utilization') or 0
 seven_u = seven.get('utilization') or 0
 max_u = max(five_u, seven_u)
 
-# Status emoji for menu bar
-if max_u >= 90:
-    icon = "🔴"
-elif max_u >= 70:
-    icon = "🟡"
-elif max_u >= 40:
-    icon = "🟠"
-else:
-    icon = "🟢"
-
-# ── Menu bar title (keep simple — no SF Symbols for compatibility) ──
-print(f"{icon} {five_u:.0f}% | {seven_u:.0f}% | size=12")
-print("---")
-
-# ── Header ──
-print("☁ Claude Code Usage | size=15 color=#FFFFFF")
+# ── Menu bar title ──
+print(f"☁ {five_u:.0f}% | size=12")
 print("---")
 
 def fmt_reset(ts):
@@ -102,51 +88,51 @@ def fmt_reset(ts):
     hours = int(diff.total_seconds() // 3600)
     mins = int((diff.total_seconds() % 3600) // 60)
     if hours > 0:
-        return f'resets in {hours}h {mins}m'
-    return f'resets in {mins}m'
-
-def color_for(u):
-    if u >= 90: return "#FF453A"
-    if u >= 70: return "#FFD60A"
-    if u >= 40: return "#FF9F0A"
-    return "#30D158"
-
-def icon_for(u):
-    if u >= 90: return "🔥"
-    if u >= 70: return "⚠️"
-    if u >= 40: return "📊"
-    return "✅"
-
-def bar(u):
-    total = 20
-    filled = round(u / 100 * total)
-    return '●' * filled + '○' * (total - filled)
+        return f'{hours}h {mins}m until reset'
+    return f'{mins}m until reset'
 
 buckets = [
-    ('5-hour window', data.get('five_hour')),
-    ('7-day rolling', data.get('seven_day')),
+    ('5-hour', data.get('five_hour')),
+    ('7-day', data.get('seven_day')),
     ('7-day Opus', data.get('seven_day_opus')),
     ('7-day Sonnet', data.get('seven_day_sonnet')),
 ]
+
+# ── Header row like Battery: "Claude Code Usage     9%" ──
+# Use 7-day as the main number (most important limit)
+print(f"Claude Code Usage \t{seven_u:.0f}% | size=14")
+
+# ── Subtitle info ──
+active = [(n, b) for n, b in buckets if b is not None]
+if active:
+    main_name, main_bucket = active[0]
+    reset = fmt_reset(main_bucket.get('resets_at'))
+    print(f"5-hour: {five_u:.0f}%  ·  7-day: {seven_u:.0f}% | size=12 color=gray")
+    if reset:
+        print(f"{reset} | size=12 color=gray")
+
+print("---")
+
+# ── Usage Windows (like Energy Mode section) ──
+print("Usage Windows | size=13 disabled=true")
 
 for name, bucket in buckets:
     if bucket is None:
         continue
     u = bucket.get('utilization') or 0
-    c = color_for(u)
     reset = fmt_reset(bucket.get('resets_at'))
+    r = reset if reset else ''
+    print(f"{name}\t{u:.0f}% | size=13")
+    if r:
+        print(f"--{r} | size=12 color=gray")
 
-    print(f"{icon_for(u)} {name} | size=13 color=#FFFFFF")
-    print(f"  {bar(u)}  {u:.0f}% | font=Menlo size=12 color={c}")
-    if reset:
-        print(f"  ⏱ {reset} | size=11 color=#8E8E93")
-    print("---")
-
-# ── Footer ──
-print("↻ Refresh | refresh=true size=12 color=#8E8E93")
+print("---")
+print("Refresh | refresh=true size=13")
 
 update_url = "https://raw.githubusercontent.com/sevenuphome/claude-usage-vscode/main/swiftbar-plugin/claude-usage.5m.sh"
 plugin_path = "$HOME/Library/Application Support/SwiftBar/Plugins/claude-usage.5m.sh"
 update_cmd = f'curl -sL {update_url} -o "{plugin_path}" && chmod +x "{plugin_path}"'
-print(f"↓ Update plugin | bash=/bin/bash param1=-c param2={update_cmd!r} terminal=false refresh=true size=12 color=#8E8E93")
+print(f"Update Plugin… | bash=/bin/bash param1=-c param2={update_cmd!r} terminal=false refresh=true size=13")
+print("---")
+print("Quit Claude Usage | bash=/bin/bash param1=-c param2='osascript -e \"tell application \\\"SwiftBar\\\" to quit\"' terminal=false size=13")
 PYEOF
