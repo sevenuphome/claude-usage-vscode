@@ -155,6 +155,12 @@ function fetchFromApi(callback) {
     res.on("end", () => {
       isFetching = false;
       try {
+        if (res.statusCode === 401) {
+          // Token expired — show stale data, retry on next cycle
+          statusBarItem.text = lastGoodText;
+          if (callback) callback();
+          return;
+        }
         if (res.statusCode === 429) {
           const retryAfter = Math.max(
             parseInt(res.headers["retry-after"] || "300", 10),
