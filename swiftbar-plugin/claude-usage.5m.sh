@@ -1,6 +1,6 @@
 #!/bin/bash
 # <bitbar.title>Claude Code Usage</bitbar.title>
-# <bitbar.version>v0.4</bitbar.version>
+# <bitbar.version>v0.5</bitbar.version>
 # <bitbar.author>sevenuphome</bitbar.author>
 # <bitbar.desc>Shows Claude Code API usage in the menu bar</bitbar.desc>
 # <swiftbar.hideAbout>true</swiftbar.hideAbout>
@@ -8,7 +8,7 @@
 # <swiftbar.hideDisablePlugin>true</swiftbar.hideDisablePlugin>
 # <swiftbar.hideSwiftBar>true</swiftbar.hideSwiftBar>
 
-VERSION="0.4"
+VERSION="0.5"
 PLUGIN_URL="https://raw.githubusercontent.com/sevenuphome/claude-usage-vscode/main/swiftbar-plugin/claude-usage.5m.sh"
 PLUGIN_PATH="$HOME/Library/Application Support/SwiftBar/Plugins/claude-usage.5m.sh"
 
@@ -151,6 +151,17 @@ for name, bucket in buckets:
     print(f"{name}\t{u:.0f}% | size=13")
     if r:
         print(f"--{r} | size=12 color=gray")
+
+# Model-scoped weekly limits (Fable etc.) only appear in the limits array
+for lim in (data.get('limits') or []):
+    model = ((lim.get('scope') or {}).get('model') or {})
+    if not model.get('display_name'):
+        continue
+    u = lim.get('percent') or 0
+    reset = fmt_reset(lim.get('resets_at'))
+    print(f"7-day {model['display_name']}\t{u:.0f}% | size=13")
+    if reset:
+        print(f"--{reset} | size=12 color=gray")
 
 print("---")
 print("Refresh | refresh=true size=13")

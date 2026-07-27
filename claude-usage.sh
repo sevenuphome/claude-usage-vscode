@@ -85,6 +85,13 @@ for name, bucket in rows:
     if bucket is None: continue
     print(f'  {name:14s} {fmt_util(bucket.get(\"utilization\")):30s} resets {fmt_reset(bucket.get(\"resets_at\"))}')
 
+# Model-scoped weekly limits (Fable etc.) only appear in the limits array
+for lim in data.get('limits', []):
+    model = (lim.get('scope') or {}).get('model') or {}
+    if not model.get('display_name'): continue
+    name = '7-day ' + model['display_name']
+    print(f'  {name:14s} {fmt_util(lim.get(\"percent\")):30s} resets {fmt_reset(lim.get(\"resets_at\"))}')
+
 extra = data.get('extra_usage', {})
 if extra.get('is_enabled'):
     print(f'  {\"Extra usage\":14s} {fmt_util(extra.get(\"utilization\")):30s} limit: \${extra.get(\"monthly_limit\", \"?\")}')

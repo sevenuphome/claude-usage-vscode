@@ -233,6 +233,13 @@ function updateStatusBar(data) {
     const reset = formatResetShort(bucket.resets_at);
     rows.push(`| ${name} | ${u}% | ${reset} |`);
   }
+  // Model-scoped weekly limits (Fable etc.) only appear in the limits array
+  for (const lim of data.limits ?? []) {
+    const name = lim.scope?.model?.display_name;
+    if (!name) continue;
+    const reset = formatResetShort(lim.resets_at);
+    rows.push(`| 7-day ${name} | ${lim.percent ?? 0}% | ${reset} |`);
+  }
   const table = [
     "**Claude Code Usage**",
     "",
